@@ -1,530 +1,371 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TechAlpha | 全球科技、AI 與投資動態情報系統</title>
-  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechAlpha | 全球科技、AI 與投資動態情報系統</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen font-sans selection:bg-indigo-500 selection:text-white">
 
-  <!-- 頂部導覽列 -->
-  <header class="border-b border-slate-800 bg-slate-950/90 sticky top-0 z-30 backdrop-blur">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center space-x-3">
-        <span class="bg-indigo-600 text-white font-black px-3 py-1 rounded-lg text-lg tracking-wider">TechAlpha</span>
-        <div>
-          <h1 class="text-lg font-bold text-white leading-tight">全球科技、AI 與投資動態情報站</h1>
-          <p class="text-xs text-slate-400">Live API 即時新聞串流 × AGENTS.md 結構化知識庫</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <span id="live-status" class="flex items-center gap-2 text-xs bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 px-3 py-1.5 rounded-full">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          即時 API 連線正常
-        </span>
-        <button onclick="openAgentModal()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-indigo-300 font-semibold px-3 py-1.5 rounded-lg transition">
-          ⚡ AI 擴充指令產生器
-        </button>
+<header class="border-b border-slate-800 bg-slate-950/90 sticky top-0 z-30 backdrop-blur">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4">
+    <div class="flex items-center space-x-3">
+      <span class="bg-indigo-600 text-white font-black px-3 py-1 rounded-lg text-lg tracking-wider">TechAlpha</span>
+      <div>
+        <h1 class="text-lg font-bold text-white leading-tight">全球科技、AI 與投資動態情報站</h1>
+        <p class="text-xs text-slate-400">即時新聞串流 × AGENTS.md 結構化知識庫</p>
       </div>
     </div>
-  </header>
-
-  <main class="max-w-6xl mx-auto px-6 py-8 space-y-12">
-
-    <!-- ==================== 第一部分：即時動態新聞串流 (Live API，完全不寫死) ==================== -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 px-2.5 py-0.5 rounded">LIVE FEED</span>
-            <h2 class="text-xl font-bold text-white">全球即時科技、AI 與市場快訊（API 動態抓取）</h2>
-          </div>
-          <p class="text-xs text-slate-400 mt-1">
-            每次開啟網頁自動透過 API 即時抓取最新新聞。點擊新聞右側按鈕，可直接套用 <code class="text-indigo-400">AGENTS.md</code> 規則轉為深度 Wiki 報告。
-          </p>
-        </div>
-
-        <!-- 即時新聞來源切換按鈕 -->
-        <div class="flex flex-wrap items-center gap-2">
-          <button onclick="fetchLiveNews('tw_tech')" id="btn-tw_tech" class="live-tab-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition">
-            🇹🇼 台灣 AI 與半導體即時
-          </button>
-          <button onclick="fetchLiveNews('tw_invest')" id="btn-tw_invest" class="live-tab-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-            💰 美股與科技投資快訊
-          </button>
-          <button onclick="fetchLiveNews('global_ai')" id="btn-global_ai" class="live-tab-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-            🌐 全球 AI 開發動態 (HN)
-          </button>
-          <button onclick="refreshCurrentFeed()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 transition" title="重新抓取最新資料">
-            🔄 重新整理
-          </button>
-        </div>
-      </div>
-
-      <!-- 動態即時新聞容器 -->
-      <div id="live-news-container" class="grid md:grid-cols-2 gap-4 mt-5">
-        <div class="col-span-2 py-8 text-center text-slate-400 animate-pulse">
-          正在透過 API 即時抓取全球最新科技與財經新聞...
-        </div>
-      </div>
-      <div class="mt-4 flex justify-between items-center text-xs text-slate-500 pt-3 border-t border-slate-800/60">
-        <span id="live-source-label">資料來源：Google News 即時 RSS 串流 / Hacker News Algolia API</span>
-        <span id="live-update-time">最後更新：載入中...</span>
-      </div>
-    </section>
-
-    <!-- ==================== 第二部分：JSON 資料驅動的深度情報 Wiki ==================== -->
-    <section>
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded">DATA-DRIVEN WIKI</span>
-            <h2 class="text-2xl font-extrabold text-white">結構化深度情報庫（讀取自 <code class="text-indigo-400">reports.json</code>）</h2>
-          </div>
-          <p class="text-sm text-slate-400">
-            採用「資料與畫面分離」架構。所有分析報告皆依循 <code class="text-indigo-400">AGENTS.md</code> 的 JSON Schema 動態渲染，支援即時搜尋與分類過濾。
-          </p>
-        </div>
-
-        <!-- 搜尋與分類過濾器 -->
-        <div class="flex flex-wrap items-center gap-3">
-          <input
-            type="text"
-            id="search-input"
-            oninput="renderReports()"
-            placeholder="🔍 搜尋關鍵字 (例: CoWoS, HBM, 3nm)..."
-            class="bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-64"
-          >
-          <select
-            id="category-select"
-            onchange="renderReports()"
-            class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
-          >
-            <option value="ALL">所有分類</option>
-            <option value="AI 趨勢">AI 趨勢</option>
-            <option value="半導體與硬體">半導體與硬體</option>
-            <option value="投資觀點">投資觀點</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- 動態渲染的深度報告列表 -->
-      <div id="reports-container" class="grid gap-6">
-        <!-- 由 JavaScript 讀取 reports.json 後自動生成 -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ==================== 彈窗 1：單篇深度情報完整檢視器 (Modal) ==================== -->
-  <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative">
-      <button onclick="closeReportModal()" class="sticky top-2 float-right bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm">
-        ✕ 關閉視窗
+    <div class="flex items-center gap-3">
+      <span id="live-status" class="flex items-center gap-2 text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-full">
+        <span id="live-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="live-status-text">連線中…</span>
+      </span>
+      <button data-action="open-agent" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-indigo-300 font-semibold px-3 py-1.5 rounded-lg transition">
+        ⚡ AI 擴充指令產生器
       </button>
-      <div id="report-modal-content"></div>
     </div>
   </div>
+</header>
 
-  <!-- ==================== 彈窗 2：AGENTS.md 規則轉換與 AI 指令產生器 ==================== -->
-  <div id="agent-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full p-6 md:p-8 shadow-2xl">
-      <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-        <h3 class="text-xl font-bold text-white">⚡ AGENTS.md 自動化擴充指令產生器</h3>
-        <button onclick="closeAgentModal()" class="text-slate-400 hover:text-white text-sm">✕ 關閉</button>
+<main class="max-w-6xl mx-auto px-6 py-8 space-y-12">
+
+  <!-- 第一部分：即時新聞（API 動態抓取） -->
+  <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold bg-rose-500/20 text-rose-400 px-2.5 py-0.5 rounded">LIVE FEED</span>
+          <h2 class="text-xl font-bold text-white">全球即時科技、AI 與市場快訊</h2>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">每次開啟網頁都會透過 API 抓取最新新聞。點擊卡片上的按鈕，可依 <code class="text-indigo-400">AGENTS.md</code> 規則轉為深度 Wiki 報告。</p>
       </div>
-      <p class="text-sm text-slate-300 mt-4 leading-relaxed">
-        這展示了本專案 <code class="text-indigo-400">AGENTS.md</code> 的核心價值：當你在上方看到任何一則最新即時新聞，只需點選「轉為 Wiki」，系統就會自動生成給 AI（Claude / Cursor）的標準指令，讓 AI 自動幫你擴充 <code class="text-indigo-400">reports.json</code>，完全不需手動改 HTML！
+      <div class="flex flex-wrap items-center gap-2">
+        <div id="live-tabs" class="flex flex-wrap gap-2"></div>
+        <button data-action="refresh" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 transition" title="重新抓取最新資料">🔄 重新整理</button>
+      </div>
+    </div>
+    <div id="live-news-container" class="grid md:grid-cols-2 gap-4 mt-5"></div>
+    <div class="mt-4 flex flex-wrap justify-between gap-2 text-xs text-slate-500 pt-3 border-t border-slate-800/60">
+      <span id="live-source-label">資料來源：Google News RSS / Hacker News Algolia API</span>
+      <span id="live-update-time">最後更新：載入中…</span>
+    </div>
+  </section>
+
+  <!-- 第二部分：reports.json 資料驅動的深度情報 -->
+  <section>
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <span class="text-xs font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded">DATA-DRIVEN WIKI</span>
+          <h2 class="text-2xl font-extrabold text-white">結構化深度情報庫</h2>
+        </div>
+        <p class="text-sm text-slate-400">資料來自 <code class="text-indigo-400">reports.json</code>，畫面由 JavaScript 動態渲染，支援即時搜尋與分類篩選。</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <input type="text" id="search-input" placeholder="🔍 搜尋關鍵字 (例: CoWoS, HBM, 3nm)"
+          class="bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-64">
+        <select id="category-select" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+          <option value="ALL">所有分類</option>
+          <option value="AI 趨勢">AI 趨勢</option>
+          <option value="半導體與硬體">半導體與硬體</option>
+          <option value="投資觀點">投資觀點</option>
+        </select>
+      </div>
+    </div>
+    <div id="reports-container" class="grid gap-6"></div>
+  </section>
+</main>
+
+<!-- 彈窗 1：深度情報完整內容 -->
+<div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl">
+    <button data-action="close-modal" class="sticky top-0 float-right bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm">✕ 關閉</button>
+    <div id="report-modal-content"></div>
+  </div>
+</div>
+
+<!-- 彈窗 2：AGENTS.md 擴充指令產生器 -->
+<div id="agent-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl">
+    <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+      <h3 class="text-xl font-bold text-white">⚡ AGENTS.md 自動化擴充指令產生器</h3>
+      <button data-action="close-modal" class="text-slate-400 hover:text-white text-sm">✕ 關閉</button>
+    </div>
+    <p class="text-sm text-slate-300 mt-4 leading-relaxed">
+      在即時新聞卡片按下「轉為 Wiki 報告」，就會產生給 AI 的標準指令。AI 只需依規範在 <code class="text-indigo-400">reports.json</code> 新增一筆資料，不必修改任何 HTML。
+    </p>
+    <div class="mt-4">
+      <label for="prompt-news-input" class="block text-xs font-semibold text-slate-400 mb-1">欲分析的新聞標題或內容：</label>
+      <input id="prompt-news-input" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" value="台積電 2 奈米試產良率超預期，AI 晶片客戶搶訂產能">
+    </div>
+    <div class="mt-4">
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-xs font-semibold text-indigo-400">複製以下指令貼給 AI (Claude / Cursor / ChatGPT)：</span>
+        <button data-action="copy-prompt" id="copy-btn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded transition">📋 一鍵複製指令</button>
+      </div>
+      <pre id="generated-prompt" class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed"></pre>
+    </div>
+  </div>
+</div>
+
+<footer class="border-t border-slate-900 mt-16 py-8 text-center text-xs text-slate-500">
+  TechAlpha 全球科技、AI 與投資動態情報系統 | TAICA_AI_2026_HW09
+</footer>
+
+<script>
+// ===== 設定：新增即時頻道只需在這裡註冊 =====
+const LIVE_SOURCES = {
+  tw_tech:   { label: '🇹🇼 台灣 AI 與半導體', type: 'rss', q: 'AI OR 台積電 OR 輝達 OR 半導體 OR CoWoS' },
+  tw_invest: { label: '💰 美股與科技投資',   type: 'rss', q: '美股 OR 那斯達克 OR 科技股 OR AI投資 OR 財報' },
+  global_ai: { label: '🌐 全球 AI 動態 (HN)', type: 'hn',  q: 'AI' }
+};
+const BADGE = {
+  'AI 趨勢': 'bg-indigo-500/20 text-indigo-300',
+  '半導體與硬體': 'bg-cyan-500/20 text-cyan-300',
+  '投資觀點': 'bg-amber-500/20 text-amber-300'
+};
+const TAB_ON  = 'text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition';
+const TAB_OFF = 'text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const timeout = () => AbortSignal.timeout(10000);
+
+let allReports = [];
+let currentFeed = 'tw_tech';
+
+// ===== 1. 讀取 reports.json =====
+async function loadReports() {
+  try {
+    const res = await fetch('./reports.json?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allReports = await res.json();
+    renderReports();
+  } catch (err) {
+    console.error(err);
+    $('reports-container').innerHTML = `
+      <div class="bg-slate-900 border border-rose-500/40 rounded-xl p-8 text-center text-slate-300 text-sm leading-relaxed">
+        <p class="text-rose-400 font-bold mb-2">無法讀取 reports.json</p>
+        <p>請確認 <code>reports.json</code> 與 <code>index.html</code> 位於同一資料夾。<br>
+        若直接雙擊開啟（file://），瀏覽器會擋下讀取，請改用 GitHub Pages 或在本機執行 <code>python -m http.server</code>。</p>
+      </div>`;
+  }
+}
+
+// ===== 2. 渲染深度情報卡片（搜尋 + 分類篩選）=====
+function renderReports() {
+  const keyword = $('search-input').value.trim().toLowerCase();
+  const category = $('category-select').value;
+
+  const list = allReports.filter(r => {
+    const pool = [r.title, r.conclusion, ...(r.tags || []), ...(r.summary || [])].join(' ').toLowerCase();
+    return (category === 'ALL' || r.category === category) && (!keyword || pool.includes(keyword));
+  });
+
+  if (!list.length) {
+    $('reports-container').innerHTML = `
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-10 text-center text-slate-400">
+        找不到符合${keyword ? '「' + esc(keyword) + '」' : '條件'}的深度情報。可以從上方即時新聞按下「轉為 Wiki 報告」，交給 AI 新增。
+      </div>`;
+    return;
+  }
+
+  $('reports-container').innerHTML = list.map(r => `
+    <article class="bg-slate-900 border border-slate-800 hover:border-indigo-500/70 rounded-xl p-6 transition shadow-lg">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="text-xs font-bold px-2.5 py-1 rounded ${BADGE[r.category] || BADGE['AI 趨勢']}">${esc(r.category)}</span>
+        <div class="flex flex-wrap gap-1.5">${(r.tags || []).map(t => `<span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">#${esc(t)}</span>`).join('')}</div>
+        <span class="text-xs text-slate-400 ml-auto">📅 ${esc(r.date)}</span>
+      </div>
+      <h3 data-action="open-report" data-id="${esc(r.id)}" class="text-xl font-bold text-white hover:text-indigo-400 cursor-pointer transition mb-2">${esc(r.title)}</h3>
+      <p class="text-sm text-slate-300 mb-4 leading-relaxed bg-slate-950/60 border-l-2 border-indigo-500 pl-3 py-1.5">
+        💡 <strong>核心結論：</strong>${esc(r.conclusion)}
       </p>
-      <div class="mt-4">
-        <label class="block text-xs font-semibold text-slate-400 mb-1">欲分析的新聞標題或內容：</label>
-        <input id="prompt-news-input" type="text" oninput="updateGeneratedPrompt()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" value="台積電 2 奈米試產良率超預期，AI 晶片客戶搶訂產能">
+      <div class="grid md:grid-cols-2 gap-3 text-xs bg-slate-950/40 p-3.5 rounded-lg border border-slate-800/80 mb-4">
+        <div class="text-emerald-400"><strong>📈 機會：</strong><span class="text-slate-300">${esc(r.bullish?.[0])}</span></div>
+        <div class="text-rose-400"><strong>⚠️ 風險：</strong><span class="text-slate-300">${esc(r.bearish?.[0])}</span></div>
       </div>
-      <div class="mt-4">
-        <div class="flex justify-between items-center mb-1">
-          <label class="text-xs font-semibold text-indigo-400">複製以下指令貼給 AI (Claude / Cursor / ChatGPT)：</label>
-          <button onclick="copyPromptText()" id="copy-btn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded transition">📋 一鍵複製指令</button>
-        </div>
-        <pre id="generated-prompt" class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed"></pre>
+      <div class="flex justify-between items-center pt-2">
+        <span class="text-xs text-slate-500">ID: <code>${esc(r.id)}</code>（由 JSON 動態渲染）</span>
+        <button data-action="open-report" data-id="${esc(r.id)}" class="text-sm font-semibold text-indigo-400 hover:text-indigo-300">展開完整分析 &rarr;</button>
       </div>
-    </div>
-  </div>
+    </article>`).join('');
+}
 
-  <footer class="border-t border-slate-900 mt-16 py-8 text-center text-xs text-slate-500">
-    <p>TechAlpha 全球科技、AI 與投資動態情報系統 | TAICA_AI_2026_HW09 專案展示</p>
-  </footer>
-
-  <!-- ==================== 核心動態 JavaScript 引擎 ==================== -->
-  <script>
-    // 備援預設資料（防止本地直接點擊 file:// 開啟時瀏覽器阻擋 fetch('./reports.json')）
-    const FALLBACK_REPORTS = [
-      {
-        "id": "post-cowos-packaging",
-        "date": "2026-11-12",
-        "category": "半導體與硬體",
-        "tags": ["CoWoS", "先進封裝", "NVIDIA", "日月光"],
-        "title": "NVIDIA 與 AMD 擴大投資台灣封測鏈：CoWoS 先進封裝產能大突圍",
-        "conclusion": "先進封裝已躍升為決定 AI 晶片出貨量的最大瓶頸，龐大資本支出正從晶圓代工外溢至台灣委外封測廠（OSAT）與面板級封裝技術。",
-        "summary": [
-          "晶片巨頭直接注資擴產：為突破台積電 CoWoS 產能瓶頸，NVIDIA 與 AMD 相繼擴大與台灣封測大廠（日月光、矽品、力成）的產能合作與資金挹注。",
-          "封裝價值佔比翻倍：隨著單一 AI 封裝整合高達 10 至 20 顆獨立晶片與 HBM，先進封裝佔晶片總成本比例逼近 50%。",
-          "次世代技術轉向矩形基板：為降低圓形晶圓邊角面積浪費，面板級封裝（FOPLP）成為設備商與封測廠下一波資本支出熱點。"
-        ],
-        "bullish": [
-          "委外封測代工廠（OSAT）迎來高毛利訂單外溢，擺脫過往傳統封測低毛利循環。",
-          "先進封裝檢測、濕製程與矩形面板級封裝（PLP）本土設備供應鏈直接受惠。"
-        ],
-        "bearish": [
-          "高階 AI 晶片單價極高，非台積電體系封測廠初期良率若不達標，可能面臨賠償與轉單風險。",
-          "巨額設備資本支出帶來折舊壓力，需密切追蹤雲端巨頭 AI 資本支出成長率是否放緩。"
-        ],
-        "glossary": [
-          {
-            "term": "CoWoS (Chip-on-Wafer-on-Substrate)",
-            "definition": "把負責運算的 GPU 晶片與負責裝資料的 HBM 記憶體，並排安裝在同一塊超高速「矽中介層」地基上，讓晶片之間的資料傳輸幾乎零延遲。"
-          },
-          {
-            "term": "面板級封裝 (Panel-Level Packaging, PLP)",
-            "definition": "傳統晶圓是圓形的，切割方形晶片時邊緣會浪費許多空間；面板級封裝改用「大長方形基板」來封裝晶片，大幅提升面積利用率並降低成本。"
-          }
-        ]
-      },
-      {
-        "id": "post-hbm-custom-3nm",
-        "date": "2026-11-10",
-        "category": "AI 趨勢",
-        "tags": ["HBM4", "台積電 3nm", "AI 記憶體", "算力瓶頸"],
-        "title": "次世代客製化 HBM 記憶體導入台積電 3nm 製程：邏輯與記憶體界線消失",
-        "conclusion": "從 HBM4 世代開始，記憶體底層的基礎晶粒（Base Die）正式轉向採用台積電先進邏輯製程，開啟「客製化記憶體」高毛利時代。",
-        "summary": [
-          "製程大躍進：過去 HBM 底層基礎晶粒多由記憶體廠自家舊製程生產，新一代產品為追求極致傳輸效率與低功耗，全面導入台積電 3nm 等先進邏輯製程。",
-          "客製化綁定客戶：AI 加速器廠商要求在基礎晶粒中加入自訂控制邏輯，使 HBM 從標準化大宗商品轉變為高度客製化的專武。",
-          "跨廠聯盟成形：SK 海力士、三星與美光皆強化與晶圓代工龍頭的設計自動化（EDA）與介面 IP 驗證合作。"
-        ],
-        "bullish": [
-          "台積電除了代工 GPU 外，還能額外吃下每顆 AI 晶片旁搭載的 8~12 顆 HBM 基礎晶粒代工訂單。",
-          "高速傳輸介面 IP（如 UCIe、HBM PHY）授權廠商迎來規格升級紅利。"
-        ],
-        "bearish": [
-          "跨晶圓廠與記憶體廠的異質整合測試流程拉長，可能影響新平台初期放量時程。",
-          "HBM 報價高昂推升 AI 伺服器總持有成本（TCO），中小型企業採購門檻提高。"
-        ],
-        "glossary": [
-          {
-            "term": "HBM (High Bandwidth Memory, 高頻寬記憶體)",
-            "definition": "就像把原本平鋪在地面上的平面停車場，改建成垂直立體的「摩天大樓停車場」，透過矽穿孔（TSV）垂直電梯連接，一次能讓海量資料同時進出 GPU。"
-          }
-        ]
-      },
-      {
-        "id": "post-cloud-asic-boom",
-        "date": "2026-11-08",
-        "category": "投資觀點",
-        "tags": ["ASIC", "自研晶片", "CSP 雲端巨頭", "推論算力"],
-        "title": "四大雲端巨頭資本支出結構轉移：自研 AI 晶片（ASIC）進入大規模推論部署",
-        "conclusion": "AI 算力重心正從「模型訓練」轉向高頻率的「商業推論」，雲端大廠透過自研 ASIC 晶片降低對單一 GPU 供應商的依賴並優化每瓦特算力成本。",
-        "summary": [
-          "推論需求超越訓練：隨著 AI Agent 與企業應用普及，日常推論消耗的算力佔比突破 60%，成本控制成為雲端大廠首要任務。",
-          "自研晶片百花齊放：Google TPU、AWS Trainium、Meta MTIA 與 Microsoft Maia 持續迭代並擴大投片規模。",
-          "IC 設計服務受惠：雲端軟體巨頭缺乏底層實體設計經驗，高度依賴台灣 ASIC 設計服務商協助完成晶片落地。"
-        ],
-        "bullish": [
-          "ASIC 設計服務（Design Service）與矽智財（IP）廠商享有穩定的委託設計費（NRE）與量產權利金。",
-          "資料中心內部高速光通訊（800G / 1.6T 光模組、矽光子 CPO）隨自研叢集擴大而剛性成長。"
-        ],
-        "bearish": [
-          "自研晶片軟體工具鏈成熟度仍落後於 NVIDIA CUDA，通用工作負載轉換不易。",
-          "單一雲端客戶訂單集中度高，若客戶延後投片，設計服務商營收波動較大。"
-        ],
-        "glossary": [
-          {
-            "term": "ASIC (客製化特殊應用晶片)",
-            "definition": "通用 GPU 就像「瑞士刀」，什麼都能做但昂貴耗電；ASIC 則是專為單一任務打造的「專用削皮刀」，只做特定 AI 運算，因此更省電且成本更低。"
-          }
-        ]
-      }
-    ];
-
-    let allReports = [];
-    let currentFeedKey = 'tw_tech';
-
-    // 1. 載入結構化 reports.json 資料庫
-    async function loadReportsData() {
-      try {
-        const res = await fetch('./reports.json?t=' + Date.now());
-        if (!res.ok) throw new Error('Fetch failed');
-        allReports = await res.json();
-      } catch (err) {
-        console.warn('使用內建備援資料渲染 reports.json:', err);
-        allReports = FALLBACK_REPORTS;
-      }
-      renderReports();
-    }
-
-    // 2. 動態渲染深度情報卡片（支援搜尋與分類篩選）
-    function renderReports() {
-      const container = document.getElementById('reports-container');
-      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
-      const category = document.getElementById('category-select').value;
-
-      const filtered = allReports.filter(item => {
-        const matchCat = category === 'ALL' || item.category === category;
-        const textPool = (item.title + item.conclusion + item.tags.join(' ') + item.summary.join(' ')).toLowerCase();
-        const matchKey = !keyword || textPool.includes(keyword);
-        return matchCat && matchKey;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-10 text-center text-slate-400">
-            找不到符合「${keyword}」的深度情報報告。你可以點選上方即時新聞旁的「⚡ 轉為 Wiki」交給 AI 自動生成！
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => {
-        const badgeColor =
-          item.category === 'AI 趨勢' ? 'bg-indigo-500/20 text-indigo-300' :
-          item.category === '半導體與硬體' ? 'bg-cyan-500/20 text-cyan-300' :
-          'bg-amber-500/20 text-amber-300';
-
-        const tagsHtml = item.tags.map(t => `<span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">#${t}</span>`).join('');
-
-        return `
-          <article class="bg-slate-900 border border-slate-800 hover:border-indigo-500/70 rounded-xl p-6 transition shadow-lg">
-            <div class="flex flex-wrap items-center gap-2 mb-3">
-              <span class="text-xs font-bold px-2.5 py-1 rounded ${badgeColor}">${item.category}</span>
-              <div class="flex flex-wrap gap-1.5">${tagsHtml}</div>
-              <span class="text-xs text-slate-400 ml-auto">📅 ${item.date}</span>
-            </div>
-            <h3 onclick="openReportDetail('${item.id}')" class="text-xl font-bold text-white hover:text-indigo-400 cursor-pointer transition mb-2">
-              ${item.title}
-            </h3>
-            <p class="text-sm text-slate-300 mb-4 leading-relaxed bg-slate-950/60 border-l-2 border-indigo-500 pl-3 py-1.5">
-              💡 <strong>核心結論：</strong>${item.conclusion}
-            </p>
-            <div class="grid md:grid-cols-2 gap-3 text-xs bg-slate-950/40 p-3.5 rounded-lg border border-slate-800/80 mb-4">
-              <div class="text-emerald-400">
-                <strong>📈 機會：</strong><span class="text-slate-300">${item.bullish[0]}</span>
-              </div>
-              <div class="text-rose-400">
-                <strong>⚠️ 風險：</strong><span class="text-slate-300">${item.bearish[0]}</span>
-              </div>
-            </div>
-            <div class="flex justify-between items-center pt-2">
-              <span class="text-xs text-slate-500">ID: <code>${item.id}</code> (由 JSON 動態渲染)</span>
-              <button onclick="openReportDetail('${item.id}')" class="text-sm font-semibold text-indigo-400 hover:text-indigo-300">
-                展開完整 5 大維度分析 &rarr;
-              </button>
-            </div>
-          </article>
-        `;
-      }).join('');
-    }
-
-    // 3. 點擊展開完整單篇分析報告 (依據 AGENTS.md 的 5 大固定區塊渲染)
-    function openReportDetail(id) {
-      const item = allReports.find(r => r.id === id);
-      if (!item) return;
-
-      const content = document.getElementById('report-modal-content');
-      content.innerHTML = `
-        <div class="space-y-6">
-          <div class="border-b border-slate-800 pb-4">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-xs font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded">${item.category}</span>
-              <span class="text-xs text-slate-400">發布日期：${item.date}</span>
-            </div>
-            <h2 class="text-2xl font-extrabold text-white mb-3">${item.title}</h2>
-            <div class="bg-indigo-950/50 border-l-4 border-indigo-500 p-4 rounded-r-lg text-indigo-200 text-sm">
-              💡 <strong>一句話核心結論：</strong>${item.conclusion}
-            </div>
-          </div>
-
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
-            <h3 class="text-base font-bold text-white mb-3">📌 三點核心摘要 (3-Bullet Executive Summary)</h3>
-            <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside leading-relaxed">
-              ${item.summary.map(s => `<li>${s}</li>`).join('')}
-            </ul>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-4">
-            <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-5">
-              <h3 class="text-base font-bold text-emerald-400 mb-3">📈 產業機會與受惠領域</h3>
-              <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside leading-relaxed">
-                ${item.bullish.map(b => `<li>${b}</li>`).join('')}
-              </ul>
-            </div>
-            <div class="bg-slate-950 border border-rose-500/30 rounded-xl p-5">
-              <h3 class="text-base font-bold text-rose-400 mb-3">⚠️ 潛在風險與觀察指標</h3>
-              <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside leading-relaxed">
-                ${item.bearish.map(b => `<li>${b}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
-            <h3 class="text-base font-bold text-white mb-3">📖 關鍵概念白話 Wiki (Tech Glossary)</h3>
-            <div class="space-y-3">
-              ${item.glossary.map(g => `
-                <div class="border-b border-slate-800/80 last:border-0 pb-3 last:pb-0">
-                  <h4 class="text-sm font-bold text-indigo-400">${g.term}</h4>
-                  <p class="text-xs text-slate-300 mt-1 leading-relaxed">${g.definition}</p>
-                </div>
-              `).join('')}
-            </div>
-          </div>
+// ===== 3. 單篇完整報告 =====
+function openReport(id) {
+  const r = allReports.find(x => x.id === id);
+  if (!r) return;
+  const ul = arr => (arr || []).map(s => `<li>${esc(s)}</li>`).join('');
+  $('report-modal-content').innerHTML = `
+    <div class="space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xs font-bold px-2.5 py-1 rounded ${BADGE[r.category] || BADGE['AI 趨勢']}">${esc(r.category)}</span>
+          <span class="text-xs text-slate-400">發布日期：${esc(r.date)}</span>
         </div>
-      `;
+        <h2 class="text-2xl font-extrabold text-white mb-3">${esc(r.title)}</h2>
+        <div class="bg-indigo-950/50 border-l-4 border-indigo-500 p-4 rounded-r-lg text-indigo-200 text-sm">💡 <strong>一句話核心結論：</strong>${esc(r.conclusion)}</div>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
+        <h3 class="text-base font-bold text-white mb-3">📌 三點核心摘要</h3>
+        <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside leading-relaxed">${ul(r.summary)}</ul>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-5">
+          <h3 class="text-base font-bold text-emerald-400 mb-3">📈 產業機會與受惠領域</h3>
+          <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside leading-relaxed">${ul(r.bullish)}</ul>
+        </div>
+        <div class="bg-slate-950 border border-rose-500/30 rounded-xl p-5">
+          <h3 class="text-base font-bold text-rose-400 mb-3">⚠️ 潛在風險與觀察指標</h3>
+          <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside leading-relaxed">${ul(r.bearish)}</ul>
+        </div>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
+        <h3 class="text-base font-bold text-white mb-3">📖 關鍵概念白話 Wiki</h3>
+        <div class="space-y-3">
+          ${(r.glossary || []).map(g => `
+            <div class="border-b border-slate-800/80 last:border-0 pb-3 last:pb-0">
+              <h4 class="text-sm font-bold text-indigo-400">${esc(g.term)}</h4>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">${esc(g.definition)}</p>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  showModal('report-modal');
+}
 
-      const modal = document.getElementById('report-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+// ===== 4. 即時新聞 API =====
+async function getHN(q) {
+  const url = 'https://hn.algolia.com/api/v1/search_by_date?query=' + encodeURIComponent(q) +
+    '&tags=story&hitsPerPage=10&numericFilters=' + encodeURIComponent('points>3');
+  const res = await fetch(url, { signal: timeout() });
+  if (!res.ok) throw new Error('HN HTTP ' + res.status);
+  const data = await res.json();
+  return data.hits.filter(h => h.title).slice(0, 6).map(h => ({
+    title: h.title,
+    link: h.url || 'https://news.ycombinator.com/item?id=' + h.objectID,
+    date: new Date(h.created_at).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    source: 'Hacker News · 🔥 ' + (h.points ?? 0)
+  }));
+}
+
+async function getRSS(q) {
+  const rss = 'https://news.google.com/rss/search?q=' + encodeURIComponent(q + ' when:7d') + '&hl=zh-TW&gl=TW&ceid=TW:zh-Hant';
+  const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rss), { signal: timeout() });
+  const data = await res.json();
+  if (data.status !== 'ok' || !data.items?.length) throw new Error('RSS unavailable');
+  return data.items.slice(0, 6).map(i => ({
+    title: i.title,
+    link: i.link,
+    date: (i.pubDate || '').slice(5, 16),
+    source: i.author || 'Google News'
+  }));
+}
+
+function setStatus(ok) {
+  $('live-dot').className = 'w-2 h-2 rounded-full ' + (ok ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400');
+  $('live-status-text').textContent = ok ? '即時 API 連線正常' : '即時 API 暫時無法連線';
+}
+
+function renderTabs() {
+  $('live-tabs').innerHTML = Object.entries(LIVE_SOURCES).map(([key, s]) =>
+    `<button data-action="feed" data-key="${key}" class="${key === currentFeed ? TAB_ON : TAB_OFF}">${s.label}</button>`).join('');
+}
+
+async function fetchLiveNews(key) {
+  currentFeed = key;
+  renderTabs();
+  $('live-news-container').innerHTML = '<div class="md:col-span-2 py-8 text-center text-slate-400 animate-pulse">🔄 正在從公開 API 抓取最新新聞…</div>';
+
+  const src = LIVE_SOURCES[key];
+  let articles, label = src.type === 'hn' ? 'Hacker News Algolia API' : 'Google News RSS';
+
+  try {
+    articles = await (src.type === 'hn' ? getHN(src.q) : getRSS(src.q));
+  } catch (err) {
+    console.warn('主要來源失敗，切換備援：', err);
+    try {
+      articles = await getHN('AI');
+      label = 'Hacker News Algolia API（RSS 暫時無法使用，已自動備援）';
+    } catch (err2) {
+      console.error(err2);
+      setStatus(false);
+      $('live-news-container').innerHTML = '<div class="md:col-span-2 py-8 text-center text-rose-400 text-sm">目前無法取得即時新聞，請檢查網路連線後按「重新整理」。</div>';
+      return;
     }
+  }
 
-    function closeReportModal() {
-      const modal = document.getElementById('report-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
+  setStatus(true);
+  $('live-source-label').textContent = '資料來源：' + label;
+  $('live-update-time').textContent = '最後同步：' + new Date().toLocaleTimeString('zh-TW');
+  $('live-news-container').innerHTML = articles.map(a => `
+    <div class="bg-slate-950/90 border border-slate-800/90 hover:border-slate-700 rounded-xl p-4 flex flex-col justify-between gap-3 transition">
+      <div>
+        <div class="flex justify-between items-center text-xs text-slate-400 mb-1.5">
+          <span class="text-indigo-400 font-medium">${esc(a.source)}</span>
+          <span>🕒 ${esc(a.date)}</span>
+        </div>
+        <a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" class="text-sm font-bold text-slate-100 hover:text-indigo-400 transition line-clamp-2 leading-snug">${esc(a.title)} ↗</a>
+      </div>
+      <div class="flex justify-end pt-2 border-t border-slate-900">
+        <button data-action="to-wiki" data-title="${esc(a.title)}" class="text-xs bg-indigo-950/80 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-700/50 px-2.5 py-1 rounded transition">⚡ 依 AGENTS.md 轉為 Wiki 報告</button>
+      </div>
+    </div>`).join('');
+}
 
-    // 4. 即時新聞 API 串接引擎 (Google News RSS via rss2json + Hacker News Algolia API)
-    async function fetchLiveNews(feedKey) {
-      currentFeedKey = feedKey;
-      const container = document.getElementById('live-news-container');
-      const timeLabel = document.getElementById('live-update-time');
+// ===== 5. AGENTS.md 擴充指令產生器 =====
+function updatePrompt() {
+  const title = $('prompt-news-input').value.trim();
+  $('generated-prompt').textContent =
+    '請閱讀本專案的 AGENTS.md 規範文件，針對以下最新科技/財經新聞，幫我在 reports.json 最上方新增一筆結構化深度情報物件。' +
+    '請嚴格遵守第 3 點的 JSON Schema（一句話結論、三點摘要、bullish 與 bearish 多空評估、白話文 glossary），不要修改 index.html。\n\n' +
+    '【新聞主題】：' + title;
+}
 
-      // 更新按鈕樣式
-      document.querySelectorAll('.live-tab-btn').forEach(btn => {
-        btn.className = 'live-tab-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
-      });
-      const activeBtn = document.getElementById('btn-' + feedKey);
-      if (activeBtn) {
-        activeBtn.className = 'live-tab-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition';
-      }
+async function copyPrompt() {
+  const btn = $('copy-btn');
+  try {
+    await navigator.clipboard.writeText($('generated-prompt').textContent);
+    btn.textContent = '✅ 已複製，可直接貼給 AI';
+  } catch {
+    btn.textContent = '複製失敗，請手動選取文字';
+  }
+  setTimeout(() => { btn.textContent = '📋 一鍵複製指令'; }, 2000);
+}
 
-      container.innerHTML = `
-        <div class="col-span-2 py-8 text-center text-slate-400 animate-pulse">
-          🔄 正在從公開 API 即時抓取最新新聞資料...
-        </div>`;
+// ===== 彈窗與事件 =====
+function showModal(id) { const m = $(id); m.classList.remove('hidden'); m.classList.add('flex'); }
+function closeModals() {
+  ['report-modal', 'agent-modal'].forEach(id => { $(id).classList.add('hidden'); $(id).classList.remove('flex'); });
+}
 
-      try {
-        let articles = [];
-        if (feedKey === 'global_ai') {
-          // 串接 Hacker News 官方即時 Algolia Search API
-          const hnUrl = '[https://hn.algolia.com/api/v1/search_by_date?query=AI+OR+LLM+OR+NVIDIA+OR+OpenAI&tags=story&hitsPerPage=6](https://hn.algolia.com/api/v1/search_by_date?query=AI+OR+LLM+OR+NVIDIA+OR+OpenAI&tags=story&hitsPerPage=6)';
-          const res = await fetch(hnUrl);
-          const data = await res.json();
-          articles = data.hits.map(h => ({
-            title: h.title,
-            link: h.url || `[https://news.ycombinator.com/item?id=$](https://news.ycombinator.com/item?id=$){h.objectID}`,
-            date: new Date(h.created_at).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-            source: `Hacker News (🔥 ${h.points || 1} pts)`
-          }));
-        } else {
-          // 串接 Google News 台灣科技/財經即時 RSS 轉 JSON API
-          const query = feedKey === 'tw_tech'
-            ? 'AI+OR+台積電+OR+輝達+OR+半導體+OR+CoWoS'
-            : '美股+OR+那斯達克+OR+科技股+OR+AI投資+OR+財報';
-          const rssUrl = `[https://news.google.com/rss/search?q=$](https://news.google.com/rss/search?q=$){query}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`;
-          const apiUrl = `[https://api.rss2json.com/v1/api.json?rss_url=$](https://api.rss2json.com/v1/api.json?rss_url=$){encodeURIComponent(rssUrl)}`;
-          const res = await fetch(apiUrl);
-          const data = await res.json();
-          if (data.status !== 'ok') throw new Error('RSS API Limit');
-          articles = data.items.slice(0, 6).map(item => ({
-            title: item.title,
-            link: item.link,
-            date: item.pubDate.slice(5, 16),
-            source: item.author || 'Google News 即時快訊'
-          }));
-        }
+document.addEventListener('click', e => {
+  if (e.target.id === 'report-modal' || e.target.id === 'agent-modal') return closeModals();
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const d = el.dataset;
+  switch (d.action) {
+    case 'open-report':   openReport(d.id); break;
+    case 'close-modal':   closeModals(); break;
+    case 'feed':          fetchLiveNews(d.key); break;
+    case 'refresh':       fetchLiveNews(currentFeed); break;
+    case 'open-agent':    updatePrompt(); showModal('agent-modal'); break;
+    case 'to-wiki':       $('prompt-news-input').value = d.title; updatePrompt(); showModal('agent-modal'); break;
+    case 'copy-prompt':   copyPrompt(); break;
+  }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+$('search-input').addEventListener('input', renderReports);
+$('category-select').addEventListener('change', renderReports);
+$('prompt-news-input').addEventListener('input', updatePrompt);
 
-        renderLiveArticles(articles);
-        timeLabel.textContent = '最後即時同步：' + new Date().toLocaleTimeString('zh-TW');
-      } catch (err) {
-        // 若 RSS2JSON 達免費頻率上限，自動無縫切換至 Hacker News 官方 API 確保永遠有真實即時新聞
-        console.warn('切換至 HN 即時 API 備援:', err);
-        const hnRes = await fetch('[https://hn.algolia.com/api/v1/search_by_date?query=AI+OR+Semiconductor+OR+NVIDIA&tags=story&hitsPerPage=6](https://hn.algolia.com/api/v1/search_by_date?query=AI+OR+Semiconductor+OR+NVIDIA&tags=story&hitsPerPage=6)');
-        const hnData = await hnRes.json();
-        const fallbackArticles = hnData.hits.map(h => ({
-          title: h.title,
-          link: h.url || `[https://news.ycombinator.com/item?id=$](https://news.ycombinator.com/item?id=$){h.objectID}`,
-          date: new Date(h.created_at).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-          source: 'Global Tech Live API'
-        }));
-        renderLiveArticles(fallbackArticles);
-        timeLabel.textContent = '最後即時同步：' + new Date().toLocaleTimeString('zh-TW');
-      }
-    }
-
-    function renderLiveArticles(articles) {
-      const container = document.getElementById('live-news-container');
-      container.innerHTML = articles.map(art => {
-        const safeTitle = art.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        return `
-          <div class="bg-slate-950/90 border border-slate-800/90 hover:border-slate-700 rounded-xl p-4 flex flex-col justify-between gap-3 transition">
-            <div>
-              <div class="flex justify-between items-center text-xs text-slate-400 mb-1.5">
-                <span class="text-indigo-400 font-medium">${art.source}</span>
-                <span>🕒 ${art.date}</span>
-              </div>
-              <a href="${art.link}" target="_blank" rel="noopener noreferrer" class="text-sm font-bold text-slate-100 hover:text-indigo-400 transition line-clamp-2 leading-snug">
-                ${art.title} ↗
-              </a>
-            </div>
-            <div class="flex justify-end pt-2 border-t border-slate-900">
-              <button onclick="openAgentWithNews('${safeTitle}')" class="text-xs bg-indigo-950/80 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-700/50 px-2.5 py-1 rounded transition">
-                ⚡ 依 AGENTS.md 規則轉為 Wiki 報告
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function refreshCurrentFeed() {
-      fetchLiveNews(currentFeedKey);
-    }
-
-    // 5. AGENTS.md 擴充指令產生器邏輯
-    function openAgentWithNews(newsTitle) {
-      document.getElementById('prompt-news-input').value = newsTitle;
-      openAgentModal();
-    }
-
-    function openAgentModal() {
-      updateGeneratedPrompt();
-      const modal = document.getElementById('agent-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeAgentModal() {
-      const modal = document.getElementById('agent-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function updateGeneratedPrompt() {
-      const title = document.getElementById('prompt-news-input').value.trim();
-      const promptBox = document.getElementById('generated-prompt');
-      promptBox.textContent = `請閱讀本專案的 AGENTS.md 規範文件，針對以下最新科技/財經新聞，幫我在 reports.json 最上方新增一筆結構化深度情報物件（請嚴格遵守第 3 點的 JSON Schema，包含一句話結論、三點摘要、bullish 與 bearish 多空雙欄評估、以及白話文 glossary 名詞解釋，不要修改 index.html 的結構）：\n\n【新聞主題】：${title}`;
-    }
-
-    function copyPromptText() {
-      const text = document.getElementById('generated-prompt').textContent;
-      navigator.clipboard.writeText(text);
-      const btn = document.getElementById('copy-btn');
-      btn.textContent = '✅ 已複製！可直接貼給 AI';
-      setTimeout(() => { btn.textContent = '📋 一鍵複製指令'; }, 2000);
-    }
-
-    // 啟動初始化
-    window.addEventListener('DOMContentLoaded', () => {
-      loadReportsData();
-      fetchLiveNews('tw_tech');
-    });
-  </script>
+window.addEventListener('DOMContentLoaded', () => {
+  loadReports();
+  fetchLiveNews(currentFeed);
+});
+</script>
 </body>
 </html>
